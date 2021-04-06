@@ -1,0 +1,42 @@
+{
+  "name": "opentelemetry-federation-integration",
+  "version": "0.0.1",
+  "description": "Demo of OpenTelemetry integration for Apollo Federation",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "concurrently -k npm:start:*",
+    "start:astronauts": "nodemon ./src/services/astronauts/index.js",
+    "start:missions": "nodemon ./src/services/missions/index.js",
+    "start:locations": "nodemon ./src/services/locations/index.js",
+    "start:gateway": "wait-on tcp:4001 tcp:4002 tcp:4003 && nodemon ./src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/federation": "latest",
+    "@apollo/gateway": "latest",
+    "@opentelemetry/api": "^0.18.0",
+    "@opentelemetry/core": "^0.18.2",
+    "@opentelemetry/exporter-zipkin": "^0.18.0",
+    "@opentelemetry/instrumentation": "^0.18.0",
+    "@opentelemetry/instrumentation-graphql": "0.15.0",
+    "@opentelemetry/instrumentation-http": "^0.18.0",
+    "@opentelemetry/node": "^0.15.0",
+    "@opentelemetry/plugin-express": "^0.15.0",
+    "@opentelemetry/plugin-http": "^0.18.2",
+    "@opentelemetry/plugin-https": "^0.18.2",
+    "@opentelemetry/tracing": "^0.18.0",
+    "apollo-reporting-protobuf": "^0.6.1",
+    "apollo-server": "latest",
+    "apollo-server-core": "^2.22.2",
+    "apollo-server-plugin-base": "^0.11.0",
+    "concurrently": "^5.3.0",
+    "dotenv": "^8.2.0",
+    "faker": "^5.5.2",
+    "graphql": "^15.5.0",
+    "nodemon": "^2.0.6",
+    "rickmortyapi": "^0.3.0",
+    "wait-on": "^5.2.0"
+  }
+}
