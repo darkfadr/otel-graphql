@@ -1,5 +1,4 @@
-const otel = require('@opentelemetry/api');
-const { getTracer } = require('./tracer');
+const { getTracer, startSpan } = require('./tracer');
 
 const responsePathArray = (rp) => {
   const path = [rp.key];
@@ -14,24 +13,6 @@ const responsePathAsString = (rp) => responsePathArray(rp).join('.');
 const parentResponsePathAsString = (rp) => {
   return responsePathArray(rp).slice(0, -1).join('.');
 };
-
-
-const isArrayPath = (path) => typeof path.key === "number";
-const buildPath = (path) => {
-  let current = path;
-  const segments = [];
-  while (current != null) {
-    if (isArrayPath(current)) {
-      segments.push(`[${current.key}]`);
-    } else {
-      segments.push(current.key);
-    }
-    current = current.prev;
-  }
-  return segments.reverse().join(".");
-}
-
-
 
 const getRootQuery = (rp) => {
   while (rp.prev) {
@@ -65,47 +46,30 @@ const generateResolverCtx = ({ path, returnType, parentType }) => {
 
 const TracingPlugin = (_futureOptions = {} ) => () => ({
   requestDidStart({ request }) {
-    const tracer = otel.trace.getTracer('basic');
-    const rootSpan = tracer.startSpan('graphql_query');
+    const rootSpan = startSpan('graphql_query');
     rootSpan.setAttribute('query', request.query);
 
     return {
       executionDidStart: ({ operationName }) => {
         return {
           willResolveField: ({ info, ...args}) => {
+            const tracer = getTracer()
             const attributes = generateResolverCtx(info);
-            const resolverSpan = tracer.startSpan(
-              attributes.name,
-              { attributes, parent: rootSpan },
-              otel.context.active()
-            );
 
-            // return otel.context.with(
-            //   otel.setSpan(otel.context.active(), resolverSpan),
-            //   () => err => {
-            //     if (err) {
-            //       resolverSpan.recordException(err);
-            //     }
-   
-            //     resolverSpan.end();  
-            //   }
-            // );
+            return tracer(rootSpan, () => {
+              const resolverSpan = tracer.startSpan(
+                attributes.name,
+                { attributes, parent: rootSpan },
+              );
 
-            // return tracer.withSpan(resolverSpan, err => {
-            //   if (err) {
-            //     resolverSpan.recordException(err);
-            //   }
- 
-            //   resolverSpan.end();
-            // });
-          
-            return err => {
-              if (err) {
-                resolverSpan.recordException(err);
-              }
- 
-              resolverSpan.end();
-            };
+              return err => {
+                if (err) {
+                  resolverSpan.recordException(err);
+                }
+                
+                resolverSpan.end();
+              };
+            });
           }
         };
       },

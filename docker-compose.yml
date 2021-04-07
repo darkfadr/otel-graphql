@@ -23,20 +23,21 @@ services:
       - 9411:9411
     # Uncomment to enable debug logging
     # command: --logging.level.zipkin2=DEBUG
-  # graphql:
-  #   container_name: graphql
-  #   restart: always
-  #   build:
-  #     context: ./server
-  #   ports:
-  #     - 4000:4000
-  #     - 4001:4001
-  #     - 4002:4002
-  #   volumes:
-  #     - ./server:/home/node/app
-  #     - /home/node/app/node_modules
-  #   depends_on:
-  #     - zipkin
-  #   env_file:
-  #     - ./server/.env
-  #   command: npm start
+  graphql:
+    container_name: graphql
+    restart: always
+    build:
+      context: ./server
+    ports:
+      - 4000:4000
+      - 4001:4001
+      - 4002:4002
+      - 4003:4003
+    volumes:
+      - ./server:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - zipkin
+    env_file:
+      - ./server/.env
+    command: npm start

@@ -6,7 +6,6 @@ initializeTracer('supergraph', 'http://localhost:9411/api/v2/spans');
 const { ApolloGateway } = require("@apollo/gateway");
 const { ApolloServer } = require("apollo-server");
 const { ApolloServerPluginInlineTrace } = require("apollo-server-core");
-const { TracingPlugin } = require("./tracingPlugin");
 
 const port = 4000;
 const gateway = new ApolloGateway({
@@ -22,7 +21,6 @@ const server = new ApolloServer({
   subscriptions: false,
   plugins: [
     ApolloServerPluginInlineTrace(),
-    TracingPlugin()
   ]
 });
 

@@ -2,13 +2,10 @@ const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
 const { NodeTracerProvider } = require("@opentelemetry/node");
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const { GraphQLInstrumentation } = require('@opentelemetry/instrumentation-graphql')
 const { ZipkinExporter } = require("@opentelemetry/exporter-zipkin");
 const opentelemetry = require("@opentelemetry/api");
 
 let tracerInstance = null;
-
-const getTracer = () => tracerInstance;
 
 function initializeTracer(serviceName, zipkinUrl) {
   if (tracerInstance !== null) return;
@@ -22,22 +19,24 @@ function initializeTracer(serviceName, zipkinUrl) {
 
   registerInstrumentations({
     instrumentations: [
-      new HttpInstrumentation(),
-      // new GraphQLInstrumentation()
+      new HttpInstrumentation()
     ],
     tracerProvider: provider,
   });
-  
-  const gql = new GraphQLInstrumentation()
-  gql.setTracerProvider(provider);
-  gql.enable();
-
 
   opentelemetry.trace.setGlobalTracerProvider(provider);
   
   tracerInstance = opentelemetry.trace.getTracer("default");
   return tracerInstance;
 };
+
+function getTracer() {
+  if (tracerInstance == null) {
+    throw new Error("Tracer is not initialized");
+  }
+
+  return tracerInstance;
+}
 
 module.exports = {
   initializeTracer,
